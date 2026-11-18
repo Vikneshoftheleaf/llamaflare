@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "model-server"
+version = "0.1.0"
+description = "A local llama.cpp model server with an interactive CLI and Cloudflare Tunnel support"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110",
+    "httpx>=0.27",
+    "huggingface-hub>=0.26",
+    "prompt-toolkit>=3.0.43",
+    "uvicorn[standard]>=0.29",
+]
+
+[project.scripts]
+model-server = "model_server.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

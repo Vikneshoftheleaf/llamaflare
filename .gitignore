@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# Downloaded model weights are large and belong on the user's machine.
+models/**/*.gguf
+models/**/*.gguf.*
+
+# Runtime data and local credentials.
+.env
+*.pid
+*.log
