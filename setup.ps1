@@ -11,7 +11,25 @@ function Test-Command([string]$Name) {
     return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
+function Refresh-Path {
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = ($machinePath + ";" + $userPath).Trim(";")
+    foreach ($candidate in @(
+        "$env:ProgramFiles\CMake\bin",
+        "${env:ProgramFiles(x86)}\CMake\bin",
+        "$env:LOCALAPPDATA\Microsoft\WindowsApps",
+        "$env:LOCALAPPDATA\Programs\Python\Python312",
+        "$env:LOCALAPPDATA\Programs\Python\Python312\Scripts"
+    )) {
+        if ($candidate -and (Test-Path $candidate) -and (($env:Path -split ";") -notcontains $candidate)) {
+            $env:Path = $candidate + ";" + $env:Path
+        }
+    }
+}
+
 Write-Host "==> Checking build tools"
+Refresh-Path
 if (-not (Test-Command git)) {
     if (Test-Command winget) {
         Write-Host "==> Installing Git"
@@ -25,7 +43,10 @@ if (-not (Test-Command cmake)) {
     if (Test-Command winget) {
         Write-Host "==> Installing CMake"
         winget install --id Kitware.CMake -e --accept-package-agreements --accept-source-agreements
-        if ($LASTEXITCODE -ne 0) { throw "CMake installation failed." }
+        Refresh-Path
+        if (-not (Test-Command cmake)) {
+            throw "CMake installation did not create a cmake command. Restart the terminal and run setup again."
+        }
     } else {
         throw "CMake is required. Install CMake and enable PATH integration."
     }
@@ -34,9 +55,21 @@ if (-not (Test-Command py) -and -not (Test-Command python) -and -not (Test-Comma
     if (Test-Command winget) {
         Write-Host "==> Installing Python 3"
         winget install --id Python.Python.3.12 -e --accept-package-agreements --accept-source-agreements
-        if ($LASTEXITCODE -ne 0) { throw "Python 3 installation failed." }
+        Refresh-Path
+        if (-not (Test-Command py) -and -not (Test-Command python) -and -not (Test-Command python3)) {
+            throw "Python 3 installation did not create a Python command. Restart the terminal and run setup again."
+        }
     } else {
         throw "Python 3 is required. Install Python 3 and enable PATH integration."
+    }
+}
+
+if (-not (Test-Command cl)) {
+    if (Test-Command winget) {
+        Write-Host "==> Installing Visual Studio C++ build tools"
+        winget install --id Microsoft.VisualStudio.2022.BuildTools -e --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" --accept-package-agreements --accept-source-agreements
+    } else {
+        throw "A C++ compiler is required. Install Visual Studio Build Tools with the Desktop development with C++ workload."
     }
 }
 

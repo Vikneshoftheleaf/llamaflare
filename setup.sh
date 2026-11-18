@@ -23,6 +23,13 @@ else
   echo "Install git, cmake, a C/C++ compiler and Python 3 manually."
 fi
 
+have git || { echo "Git is required."; exit 1; }
+have cmake || { echo "CMake is required."; exit 1; }
+if ! have python3 && ! have python; then
+  echo "Python 3 is required."
+  exit 1
+fi
+
 if [ ! -d llama.cpp ]; then
   echo "==> Cloning llama.cpp"
   git clone --depth 1 https://github.com/ggml-org/llama.cpp.git llama.cpp
