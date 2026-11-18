@@ -1,4 +1,4 @@
-# tiny-llamacpp-tunnel
+# Server for Models with Tunnel
 
 Run a small LLM on a low-RAM, CPU-only Linux PC with [llama.cpp](https://github.com/ggml-org/llama.cpp):
 terminal chat, a local API + web UI, or a public API through a Cloudflare quick tunnel (with an API key).
